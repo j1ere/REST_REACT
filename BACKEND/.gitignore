@@ -1,0 +1,21 @@
+#ignore all django migration files
+**/migrations/*.py
+**/migrations/*.pyc
+
+# byte-compiled / optimized / DDL files
+__pycache__/
+*.py[cod]
+
+#vscode
+.vscode/
+
+#ignore virtual environments
+.env/
+venv/
+ENV/
+.venv/
+env/
+
+# ignore poetry files
+poetry.lock
+#note: keep pyproject.toml under version control!
