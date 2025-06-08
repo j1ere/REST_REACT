@@ -12,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = { 'email': {'required': True} }
 
     def validate(self, attrs):
-        if attrs['password'] == attrs['password2']:
+        if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({'password': 'passwords do not match'})
         return attrs
     
@@ -40,4 +40,3 @@ you use ** when: you have a dictionary whose data matches
  the expected parameter names of a function or method
  and you want to pass those key-value pairs as individual keyword arguments
     """
-    
