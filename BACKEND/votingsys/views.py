@@ -59,9 +59,9 @@ class RegisterAspirantView(APIView):
             return Response({"message": "aspirant registered successfully "}, status=status.HTTP_201_CREATED)
         
 
-
+from .permissions import HasNotVoted, IsAdminUser
 class VoteView(APIView):
-    permission_classes= [IsAuthenticated]
+    permission_classes= [IsAuthenticated, HasNotVoted]
 
     def post(self, request):
         user = request.user
@@ -74,13 +74,13 @@ class VoteView(APIView):
         
 
         with connection.cursor() as cursor:
-            #check whether user has already voted
-            cursor.execute("SELECT 1 FROM Votes WHERE voter_id= %s", [user.username])
-            if cursor.fetchone():
-                return Response({"error": "you have already voted"}, status=status.HTTP_400_BAD_REQUEST)
+            # #check whether user has already voted
+            # cursor.execute("SELECT 1 FROM Votes WHERE voter_id= %s", [user.username])
+            # if cursor.fetchone():
+            #     return Response({"error": "you have already voted"}, status=status.HTTP_400_BAD_REQUEST)
 
             #check if aspirant exists
-            cursor.execute("SELECT 1 FROM Aspirants WHERE id_number=%s", [user.username])
+            cursor.execute("SELECT 1 FROM Aspirants WHERE id_number=%s", [aspirant_id])
             if not cursor.fetchone():
                 return Response({"error": "aspirant DOES NOT exist"}, status=status.HTTP_404_NOT_FOUND)
             #vote 
@@ -103,4 +103,20 @@ class HasVotedView(APIView):
                 return Response({"has voted": True, "candidate voted for": result[0] })
             return Response({"has voted": False})
             
+
+
+class VoteResultsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT a.full_name, COUNT(v.voter_id) as vote_count FROM Aspirants a 
+                LEFT JOIN Votes v ON a.id_number=v.aspirant_id 
+                GROUP BY a.full_name ORDER BY vote_count DESC  
+            """)
             
+            results = cursor.fetchall()
+
+        response_data = [{"name": full_name, "votes": vote_count} for full_name, vote_count in results]
+        return Response(response_data)

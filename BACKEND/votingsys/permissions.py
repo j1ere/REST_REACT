@@ -15,7 +15,7 @@ class HasNotVoted(permissions.BasePermission):
     ensure the user has not voted
     """ 
     def has_permission(self, request, view):
-        user_id = request.user.id
+        user_id = request.username
 
         #if the user is not authenticated, deny access
         if not request.user.is_authenticated:
