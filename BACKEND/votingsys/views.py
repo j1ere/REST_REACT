@@ -6,14 +6,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from django.db import connection
-
+from django.db import transaction
 
 class RegisterView(APIView):
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            with transaction.atomic():
+                user = serializer.save() #this uses the create() in serializer to save the user to the database
+
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute("INSERT INTO Users (id_number, email, full_name) VALUES (%s, %s, %s)", [user.username, user.email, user.first_name])
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
             #create JWT token manually
             refresh = RefreshToken.for_user(user)
@@ -36,7 +44,7 @@ class RegisterAspirantView(APIView):
         user = request.user
 
         #check if the user is already an aspirant
-        with connection.cursor as cursor:
+        with connection.cursor() as cursor:
             cursor.execute("SELECT 1 FROM Aspirants WHERE id_number = %s", [user.username])
 
             if cursor.fetchone():
@@ -47,5 +55,5 @@ class RegisterAspirantView(APIView):
             if not name:
                 return Response({"error": "aspirant name is required"}, status=status.HTTP_400_BAD_REQUEST)
             
-            cursor.execute("INSERT INTO Aspirants (id_number, name) VALUES (%s, %s)", [user.username, name])
+            cursor.execute("INSERT INTO Aspirants (id_number, full_name) VALUES (%s, %s)", [user.username, name])
             return Response({"message": "aspirant registered successfully "}, status=status.HTTP_201_CREATED)
