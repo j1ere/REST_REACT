@@ -81,10 +81,26 @@ class VoteView(APIView):
 
             #check if aspirant exists
             cursor.execute("SELECT 1 FROM Aspirants WHERE id_number=%s", [user.username])
-            if not cursor.fetchone:
+            if not cursor.fetchone():
                 return Response({"error": "aspirant DOES NOT exist"}, status=status.HTTP_404_NOT_FOUND)
             #vote 
             cursor.execute("INSERT INTO Votes (voter_id, aspirant_id) VALUES (%s, %s)", [user.username, aspirant_id])
             return Response({"message": "voting successful"}, status=status.HTTP_201_CREATED)
                 
 
+class HasVotedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT aspirant_id FROM Votes WHERE voter_id=%s", [user.username])
+
+            result = cursor.fetchone()
+            
+            if result:
+                return Response({"has voted": True, "candidate voted for": result[0] })
+            return Response({"has voted": False})
+            
+            
