@@ -57,3 +57,34 @@ class RegisterAspirantView(APIView):
             
             cursor.execute("INSERT INTO Aspirants (id_number, full_name) VALUES (%s, %s)", [user.username, name])
             return Response({"message": "aspirant registered successfully "}, status=status.HTTP_201_CREATED)
+        
+
+
+class VoteView(APIView):
+    permission_classes= [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+
+        aspirant_id = request.data.get("aspirant_id")
+
+        if not aspirant_id:
+            return Response({"error": "aspirant id required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+
+        with connection.cursor() as cursor:
+            #check whether user has already voted
+            cursor.execute("SELECT 1 FROM Votes WHERE voter_id= %s", [user.username])
+            if cursor.fetchone():
+                return Response({"error": "you have already voted"}, status=status.HTTP_400_BAD_REQUEST)
+
+            #check if aspirant exists
+            cursor.execute("SELECT 1 FROM Aspirants WHERE id_number=%s", [user.username])
+            if not cursor.fetchone:
+                return Response({"error": "aspirant DOES NOT exist"}, status=status.HTTP_404_NOT_FOUND)
+            #vote 
+            cursor.execute("INSERT INTO Votes (voter_id, aspirant_id) VALUES (%s, %s)", [user.username, aspirant_id])
+            return Response({"message": "voting successful"}, status=status.HTTP_201_CREATED)
+                
+
