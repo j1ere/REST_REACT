@@ -15,6 +15,25 @@ files = [
 tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
 
 [[package]]
+name = "channels"
+version = "4.2.2"
+description = "Brings async, event-driven capabilities to Django."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "channels-4.2.2-py3-none-any.whl", hash = "sha256:ff36a6e1576cacf40bcdc615fa7aece7a709fc4fdd2dc87f2971f4061ffdaa81"},
+    {file = "channels-4.2.2.tar.gz", hash = "sha256:8d7208e48ab8fdb972aaeae8311ce920637d97656ffc7ae5eca4f93f84bcd9a0"},
+]
+
+[package.dependencies]
+asgiref = ">=3.6.0,<4"
+Django = ">=4.2"
+
+[package.extras]
+daphne = ["daphne (>=4.0.0)"]
+tests = ["async-timeout", "coverage (>=4.5,<5.0)", "pytest", "pytest-asyncio", "pytest-django"]
+
+[[package]]
 name = "django"
 version = "5.2.2"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
@@ -136,4 +155,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "3d44cd2ea98ea8013600c4ed53e0792e37f1a1a1ce71629e204e611723451b46"
+content-hash = "42359598ee2c77236558e5dce060d8202e662a5649cd9ff932b1848fe6554b1f"
