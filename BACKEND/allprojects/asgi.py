@@ -24,5 +24,5 @@ application = ProtocolTypeRouter({
         URLRouter(
             videocalls.routing.websocket_urlpatterns
         )
-    )
+    ),
 })
